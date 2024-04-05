@@ -97,7 +97,7 @@ router.route('/Reviews')
                 return res.status(404).json(err, "Review not found.");
             }
 
-            res.json({success: true, msg: 'GET review', review: outReview})
+            res.json({success: true, msg: 'GET Review', review: outReview})
         });
     })
     .post(authJwtController.isAuthenticated, (req, res) => {
