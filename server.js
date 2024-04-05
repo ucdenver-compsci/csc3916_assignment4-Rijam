@@ -123,11 +123,11 @@ router.route('/movies')
             movie.title = req.body.title;
     
         Movie.findOne({ title: movie.title }).exec(function(err, outMovie) {
-            if (err) {
+            if (err || outMovie == null) {
                 return res.status(404).json(err, "Movie not found.");
             }
 
-            res.json({success: true, msg: 'GET movie\n' + outMovie})
+            res.json({success: true, msg: 'GET movie', movie: outMovie})
         });
         //res.json(o);
     })
@@ -154,7 +154,7 @@ router.route('/movies')
                         return res.json(err);
                 }
     
-                res.json({success: true, msg: 'Movie saved'})
+                res.json({success: true, msg: 'Movie saved', movie: movie.title})
             });
         }
     })
@@ -175,12 +175,12 @@ router.route('/movies')
             movie.actors = req.body.actors;
             movie.releaseDate = req.body.releaseDate;
     
-            movie.update(function(err){
+            Movie.findOneAndUpdate({ title: movie.title}, movie.releaseDate, movie.genre, movie.actors).exec(function(err) {
                 if (err) {
                     return res.json(err);
                 }
     
-                res.json({success: true, msg: 'Movie updated'})
+                res.json({success: true, msg: 'Movie updated', movie: movie.title})
             });
         }
     })
@@ -200,7 +200,7 @@ router.route('/movies')
             if (err) {
                 return res.json(err);
             }
-            res.json({success: true, msg: 'Movie deleted\n' + outMovie.title})
+            res.json({success: true, msg: 'Movie deleted', movie: outMovie.title})
         });
         //res.json(o);
     })
