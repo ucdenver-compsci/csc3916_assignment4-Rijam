@@ -122,12 +122,12 @@ router.route('/movies')
         var movie = new Movie();
             movie.title = req.body.title;
     
-            movie.find({ title: movie.title }).select('title releaseDate genre actors').exec(function(err, user) {
+            movie.findOne({ title: movie.title }).exec(function(err, outMovie) {
                 if (err) {
                     return res.json(err);
                 }
     
-                res.json({success: true, msg: 'GET movie\n' + movie})
+                res.json({success: true, msg: 'GET movie\n' + outMovie})
             });
         res.json(o);
     })
@@ -196,12 +196,17 @@ router.route('/movies')
         var movie = new Movie();
             movie.title = req.body.title;
     
-            movie.delete({ title: movie.title }).exec(function(err) {
+            movie.findOne({ title: movie.title }).exec(function(err, outMovie) {
                 if (err) {
                     return res.json(err);
                 }
-    
-                res.json({success: true, msg: 'Movie deleted\n' + movie.title})
+                
+                outMovie.delete(function(err) {
+                    if (err) {
+                        return res.json(err);
+                    }
+                    res.json({success: true, msg: 'Movie deleted\n' + outMovie.title})
+                });
             });
         res.json(o);
     })
