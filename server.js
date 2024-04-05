@@ -115,41 +115,112 @@ router.route('/Reviews')
         res.status(405).send({ message: 'HTTP method not supported.' });
     });
 
-    router.route('/movies')
+router.route('/movies')
     .get((req, res) => {
-        var o = getJSONObjectForMovieRequirement(req);
-        o.status = 200;
-        o.message = "GET movies";
+        //var o = getJSONObjectForMovieRequirement(req);
+        //Movie.find({ title:  }).select('name username password').exec(function(err, user))
+        var movie = new Movie();
+            movie.title = req.body.title;
+    
+            movie.find({ title: movie.title }).select('title releaseDate genre actors').exec(function(err, user) {
+                if (err) {
+                    return res.json(err);
+                }
+    
+                res.json({success: true, msg: 'GET movie\n' + movie})
+            });
         res.json(o);
     })
     .post((req, res) => {
-        var o = getJSONObjectForMovieRequirement(req);
+        /*var o = getJSONObjectForMovieRequirement(req);
         o.status = 200;
         o.message = "movie saved";
-        res.json(o);
+        res.json(o);*/
+
+        if (!req.body.title || !req.body.genre || !req.body.actors) {
+            res.json({success: false, msg: 'Please include the title, genre, and actors.'})
+        } else {
+            var movie = new Movie();
+            movie.title = req.body.title;
+            movie.genre = req.body.genre;
+            movie.actors = req.body.actors;
+            movie.releaseDate = req.body.releaseDate != null ? req.body.releaseDate : null;
+    
+            movie.save(function(err){
+                if (err) {
+                    if (err.code == 11000)
+                        return res.json({ success: false, message: 'A movie with that name already exists.'});
+                    else
+                        return res.json(err);
+                }
+    
+                res.json({success: true, msg: 'Movie saved'})
+            });
+        }
     })
     .put(authJwtController.isAuthenticated, (req, res) => {
         // HTTP PUT Method
         // Requires JWT authentication.
         // Returns a JSON object with status, message, headers, query, and env.
-        var o = getJSONObjectForMovieRequirement(req);
+        /*var o = getJSONObjectForMovieRequirement(req);
         o.status = 200;
         o.message = "movie updated";
-        res.json(o);
+        res.json(o);*/
+        if (!req.body.title || !req.body.genre || !req.body.actors) {
+            res.json({success: false, msg: 'Please include the title, genre, and actors.'})
+        } else {
+            var movie = new Movie();
+            movie.title = req.body.title;
+            movie.genre = req.body.genre;
+            movie.actors = req.body.actors;
+            movie.releaseDate = req.body.releaseDate;
+    
+            movie.set(function(err){
+                if (err) {
+                    return res.json(err);
+                }
+    
+                res.json({success: true, msg: 'Movie updated'})
+            });
+        }
     })
     .delete(authJwtController.isAuthenticated, (req, res) => {
         // HTTP DELETE Method
         // Requires JWT authentication.
         // Returns a JSON object with status, message, headers, query, and env.
-        var o = getJSONObjectForMovieRequirement(req);
+        /*var o = getJSONObjectForMovieRequirement(req);
         o.status = 200;
         o.message = "movie deleted";
+        res.json(o);*/
+
+        var movie = new Movie();
+            movie.title = req.body.title;
+    
+            movie.delete({ title: movie.title }).exec(function(err) {
+                if (err) {
+                    return res.json(err);
+                }
+    
+                res.json({success: true, msg: 'Movie deleted\n' + movie.title})
+            });
         res.json(o);
     })
     .all((req, res) => {
         // Any other HTTP Method
         // Returns a message stating that the HTTP method is unsupported.
         res.status(405).send({ message: 'HTTP method not supported.' });
+    });
+
+router.route('/movies/:id')
+    .get((req, res) => {
+        Movie.find(function(err, movies) {
+            if (err) {
+                res.status(401).send({ message: 'Movie not found' });
+            }
+            else {
+                res.json(movies);
+            }
+        })
     });
 
 app.use('/', router);
