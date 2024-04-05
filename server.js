@@ -89,25 +89,51 @@ router.post('/signin', function (req, res) {
 
 router.route('/Reviews')
     .get((req, res) => {
-        var o = getJSONObjectForMovieRequirement(req);
-        o.status = 200;
-        o.message = "GET Review";
-        res.json(o);
+        var review = new Review();
+            review.movieId = req.body.movieId;
+    
+        Review.findOne({ movieId: review.movieId }).exec(function(err, outReview) {
+            if (err || outReview == null) {
+                return res.status(404).json(err, "Review not found.");
+            }
+
+            res.json({success: true, msg: 'GET review', review: outReview})
+        });
     })
     .post(authJwtController.isAuthenticated, (req, res) => {
-        var o = getJSONObjectForMovieRequirement(req);
-        o.status = 200;
-        o.message = "Review created!";
-        res.json(o);
+        var review = new Review();
+        review.movieId = req.body.movieId;
+        review.username = req.body.username;
+        review.review = req.body.review;
+        review.rating = req.body.rating;
+
+        review.save(function(err){
+            if (err) {
+                if (err.code == 11000)
+                    return res.json({ success: false, message: 'A review with that name already exists.'});
+                else
+                    return res.json(err);
+            }
+
+            res.json({success: true, msg: 'Review created!', review: review})
+        });
     })
     .delete(authJwtController.isAuthenticated, (req, res) => {
         // HTTP DELETE Method
         // Requires JWT authentication.
         // Returns a JSON object with status, message, headers, query, and env.
-        var o = getJSONObjectForMovieRequirement(req);
-        o.status = 200;
-        o.message = "Review deleted";
-        res.json(o);
+        var review = new Review();
+        review.movieId = req.body.movieId;
+        review.username = req.body.username;
+        review.review = req.body.review;
+        review.rating = req.body.rating;
+    
+        Review.findOneAndDelete({ movieId: review.movieId }).exec(function(err, outReview) {
+            if (err) {
+                return res.json(err);
+            }
+            res.json({success: true, msg: 'Review deleted', review: outReview})
+        });
     })
     .all((req, res) => {
         // Any other HTTP Method
@@ -117,8 +143,6 @@ router.route('/Reviews')
 
 router.route('/movies')
     .get((req, res) => {
-        //var o = getJSONObjectForMovieRequirement(req);
-        //Movie.find({ title:  }).select('name username password').exec(function(err, user))
         var movie = new Movie();
             movie.title = req.body.title;
     
@@ -129,14 +153,8 @@ router.route('/movies')
 
             res.json({success: true, msg: 'GET movie', movie: outMovie})
         });
-        //res.json(o);
     })
     .post((req, res) => {
-        /*var o = getJSONObjectForMovieRequirement(req);
-        o.status = 200;
-        o.message = "movie saved";
-        res.json(o);*/
-
         if (!req.body.title || !req.body.genre || !req.body.actors) {
             res.json({success: false, msg: 'Please include the title, genre, and actors.'})
         } else {
@@ -162,10 +180,6 @@ router.route('/movies')
         // HTTP PUT Method
         // Requires JWT authentication.
         // Returns a JSON object with status, message, headers, query, and env.
-        /*var o = getJSONObjectForMovieRequirement(req);
-        o.status = 200;
-        o.message = "movie updated";
-        res.json(o);*/
         if (!req.body.title || !req.body.genre || !req.body.actors) {
             res.json({success: false, msg: 'Please include the title, genre, and actors.'})
         } else {
@@ -188,10 +202,6 @@ router.route('/movies')
         // HTTP DELETE Method
         // Requires JWT authentication.
         // Returns a JSON object with status, message, headers, query, and env.
-        /*var o = getJSONObjectForMovieRequirement(req);
-        o.status = 200;
-        o.message = "movie deleted";
-        res.json(o);*/
 
         var movie = new Movie();
             movie.title = req.body.title;
@@ -202,7 +212,6 @@ router.route('/movies')
             }
             res.json({success: true, msg: 'Movie deleted', movie: outMovie.title})
         });
-        //res.json(o);
     })
     .all((req, res) => {
         // Any other HTTP Method
