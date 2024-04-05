@@ -122,14 +122,14 @@ router.route('/movies')
         var movie = new Movie();
             movie.title = req.body.title;
     
-            movie.findOne({ title: movie.title }).exec(function(err, outMovie) {
-                if (err) {
-                    return res.json(err);
-                }
-    
-                res.json({success: true, msg: 'GET movie\n' + outMovie})
-            });
-        res.json(o);
+        Movie.findOne({ title: movie.title }).exec(function(err, outMovie) {
+            if (err) {
+                return res.status(404).json(err, "Movie not found.");
+            }
+
+            res.json({success: true, msg: 'GET movie\n' + outMovie})
+        });
+        //res.json(o);
     })
     .post((req, res) => {
         /*var o = getJSONObjectForMovieRequirement(req);
@@ -175,7 +175,7 @@ router.route('/movies')
             movie.actors = req.body.actors;
             movie.releaseDate = req.body.releaseDate;
     
-            movie.set(function(err){
+            movie.update(function(err){
                 if (err) {
                     return res.json(err);
                 }
@@ -196,19 +196,13 @@ router.route('/movies')
         var movie = new Movie();
             movie.title = req.body.title;
     
-            movie.findOne({ title: movie.title }).exec(function(err, outMovie) {
-                if (err) {
-                    return res.json(err);
-                }
-                
-                outMovie.delete(function(err) {
-                    if (err) {
-                        return res.json(err);
-                    }
-                    res.json({success: true, msg: 'Movie deleted\n' + outMovie.title})
-                });
-            });
-        res.json(o);
+        Movie.findOneAndDelete({ title: movie.title }).exec(function(err, outMovie) {
+            if (err) {
+                return res.json(err);
+            }
+            res.json({success: true, msg: 'Movie deleted\n' + outMovie.title})
+        });
+        //res.json(o);
     })
     .all((req, res) => {
         // Any other HTTP Method
