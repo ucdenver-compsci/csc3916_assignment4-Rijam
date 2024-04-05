@@ -175,7 +175,7 @@ router.route('/movies')
             movie.actors = req.body.actors;
             movie.releaseDate = req.body.releaseDate;
     
-            Movie.findOneAndUpdate({ title: movie.title}, movie).exec(function(err) {
+            Movie.findOneAndUpdate({ title: movie.title}, {relaseDate: movie.releaseDate, genre: movie.genre, actors: movie.actors}).exec(function(err) {
                 if (err) {
                     return res.json(err);
                 }
