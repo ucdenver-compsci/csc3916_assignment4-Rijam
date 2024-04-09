@@ -148,7 +148,7 @@ router.route('/movies')
     
         Movie.findOne({ title: movie.title }).exec(function(err, outMovie) {
             if (err || outMovie == null) {
-                return res.status(404).json(err, "Movie not found.");
+                return res.status(401).json(err, "Movie not found.");
             }
 
             res.json({success: true, msg: 'GET movie', movie: outMovie})
@@ -221,14 +221,16 @@ router.route('/movies')
 
 router.route('/movies/:id')
     .get((req, res) => {
-        Movie.find(function(err, movies) {
-            if (err) {
-                res.status(401).send({ message: 'Movie not found' });
+        var movie = new Movie();
+        movie.id = req.body._id;
+
+        Movie.findOne({ _id: movie.id }).exec(function(err, outMovie) {
+            if (err || outMovie == null) {
+                return res.status(401).json(err, "Movie not found.");
             }
-            else {
-                res.json(movies);
-            }
-        })
+
+            res.json({success: true, msg: 'GET movie', movie: outMovie})
+        });
     });
 
 app.use('/', router);
