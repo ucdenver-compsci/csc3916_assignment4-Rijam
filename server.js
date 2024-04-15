@@ -221,9 +221,7 @@ router.route('/movies')
 
 router.route('/movies/:id')
     .get(authJwtController.isAuthenticated, (req, res) => {
-        const movie = Movie.find(movie => movie.id.toString() === req.params.id);
-        res.status(200).json(movie);
-        /*var movie = new Movie();
+        var movie = new Movie();
         movie.id = req.params.id;
 
         Movie.findOne({ _id: movie.id }).exec(function(err, outMovie) {
@@ -233,7 +231,6 @@ router.route('/movies/:id')
 
             res.json({success: true, msg: 'GET movie', movie: outMovie})
         });
-        */
     });
 
 app.use('/', router);
