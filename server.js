@@ -88,7 +88,7 @@ router.post('/signin', function (req, res) {
 });
 
 router.route('/Reviews')
-    .get((req, res) => {
+    .get(authJwtController.isAuthenticated, (req, res) => {
         var review = new Review();
             review.movieId = req.body.movieId;
     
@@ -142,7 +142,7 @@ router.route('/Reviews')
     });
 
 router.route('/movies')
-    .get((req, res) => {
+    .get(authJwtController.isAuthenticated, (req, res) => {
         var movie = new Movie();
             movie.title = req.body.title;
     
@@ -154,7 +154,7 @@ router.route('/movies')
             res.json({success: true, msg: 'GET movie', movie: outMovie})
         });
     })
-    .post((req, res) => {
+    .post(authJwtController.isAuthenticated, (req, res) => {
         if (!req.body.title || !req.body.genre || !req.body.actors) {
             res.json({success: false, msg: 'Please include the title, genre, and actors.'})
         } else {
@@ -220,9 +220,11 @@ router.route('/movies')
     });
 
 router.route('/movies/:id')
-    .get((req, res) => {
-        var movie = new Movie();
-        movie.id = req.body._id;
+    .get(authJwtController.isAuthenticated, (req, res) => {
+        const movie = Movie.find(movie => movie.id.toString() === req.params.id);
+        res.status(200).json(movie);
+        /*var movie = new Movie();
+        movie.id = req.params.id;
 
         Movie.findOne({ _id: movie.id }).exec(function(err, outMovie) {
             if (err || outMovie == null) {
@@ -231,6 +233,7 @@ router.route('/movies/:id')
 
             res.json({success: true, msg: 'GET movie', movie: outMovie})
         });
+        */
     });
 
 app.use('/', router);
