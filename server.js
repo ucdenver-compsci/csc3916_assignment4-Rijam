@@ -221,16 +221,38 @@ router.route('/movies')
 
 router.route('/movies/:id')
     .get(authJwtController.isAuthenticated, (req, res) => {
-        var movie = new Movie();
-        movie.id = req.params.id;
+        var id = req.params.id;
 
-        Movie.findOne({ _id: movie.id }).exec(function(err, outMovie) {
-            if (err || outMovie == null) {
-                return res.status(401).json(err, "Movie not found.");
-            }
-
-            res.json({success: true, msg: 'GET movie', movie: outMovie})
-        });
+        if (req.query.reviews === "true") {
+            Movie.aggregate([
+                {
+                    $match: { _id: ObjectId(id) }
+                },
+                {
+                    $lookup: {
+                        from: "reviews",
+                        localField: "_id",
+                        foreignField: "movieId",
+                        as: "reviews"
+                    }
+                }
+            ]).exec(function (err, outMovie) {
+                if (err) {
+                    return res.status(404).json({ success: false, message: "Movie not found" });
+                } else {
+                    res.status(200).json({ success: true, message: "GET Movie", outMovie });
+                }
+            });
+        }
+        else {
+            Movie.findById(id).exec(function (err, outMovie) {
+                if (err) {
+                    return res.status(404).json({ success: false, message: "Movie not found" });
+                } else {
+                    res.status(200).json({ success: true, message: "GET Movie", outMovie });
+                }
+            });
+        }
     });
 
 app.use('/', router);
