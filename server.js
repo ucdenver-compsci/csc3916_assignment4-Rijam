@@ -233,8 +233,16 @@ router.route('/movies/:id')
                         from: "reviews",
                         localField: "_id",
                         foreignField: "movieId",
-                        as: "reviews"
+                        as: "movieReviews"
                     }
+                },
+                {
+                  $addFields: {
+                    avgRating: { $avg: '$movieReviews.rating' }
+                  }
+                },
+                {
+                  $sort: { avgRating: -1 }
                 }
             ]).exec(function (err, outMovie) {
                 if (err) {
